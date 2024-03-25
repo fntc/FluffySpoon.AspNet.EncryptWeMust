@@ -91,8 +91,8 @@ namespace FluffySpoon.AspNet.EncryptWeMust.Certes
 
             var pfxBuilder = certificateChain.ToPfx(keyPair);
 			
-            pfxBuilder.FullChain = true;
-
+            pfxBuilder.FullChain = _options.ExpectFullChain;
+            
             var pfxBytes = pfxBuilder.Build(CertificateFriendlyName, nameof(FluffySpoon));
 
             _logger.LogInformation("Certificate acquired.");

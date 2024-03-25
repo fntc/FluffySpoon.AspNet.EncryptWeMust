@@ -55,7 +55,12 @@ namespace FluffySpoon.AspNet.EncryptWeMust.Certes
 		/// Preferred Chain, when set will define up to which certificate the 
 		/// LetsEncrypt Long Chain: ISRG Root X1
 		/// </summary>
-		public string PreferredChain { get; set; } = "ISRG Root X1";
+		public string PreferredChain { get; set; }
+
+		/// <summary>
+		/// Expect Certificate chain to be full chain
+		/// </summary>
+		public bool ExpectFullChain { get; set; } = true;
 
 		/// <summary>
 		/// Get or set a delay before the initial run of the renewal service (subsequent runs will be at 1hr intervals)
