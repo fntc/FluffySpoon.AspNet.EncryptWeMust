@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using FluffySpoon.AspNet.EncryptWeMust.Certes;
@@ -34,9 +36,20 @@ namespace FluffySpoon.AspNet.EncryptWeMust.Azure
 				var domainsTag = _letsEncryptOptions
 					.Domains
 					.Aggregate(string.Empty, (a, b) => a + "," + b);
+				if (domainsTag.Length > 512)
+				{
+				 	domainsTag = domainsTag.Substring(0, 512-prefix.Length-32)
+				 	             + BitConverter.ToUInt64(SHA512.HashData(Encoding.ASCII.GetBytes(domainsTag)), 0);
+				}
 				return prefix + "_" + domainsTag;
 			}
 		}
+
+		private string CertName
+			=> TagName.Length < 150
+				? TagName
+				: TagName.Substring(0, 150)
+				  + BitConverter.ToUInt64(SHA512.HashData(Encoding.ASCII.GetBytes(TagName)), 0);
 
 		public AzureAppServiceSslBindingCertificatePersistenceStrategy(
 			AzureOptions azureOptions,
@@ -218,7 +231,7 @@ namespace FluffySpoon.AspNet.EncryptWeMust.Azure
 		/// </summary>
 		private async Task<IAppServiceCertificate> CreateNewCertificateAsync(byte[] bytes, string regionName)
 		{
-			var certificateName = TagName + "_" + Guid.NewGuid();
+			var certificateName = CertName + "_" + Guid.NewGuid();
 			
 			_logger.LogInformation("Creating new Azure certificate with name {CertificateName} in resource group {ResourceGroupName}, region {Region}.", 
 				certificateName, _azureOptions.ResourceGroupName, regionName);
